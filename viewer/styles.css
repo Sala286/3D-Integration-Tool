@@ -1,0 +1,1932 @@
+:root {
+    /* Primary Colors */
+    --primary-color: #6666FF;
+    --primary-color-light: rgba(102, 102, 255, 0.1);
+    --primary-color-dark: #5555EE;
+    --primary-color-gradient-start: rgba(102, 102, 255, 0.15);
+    --primary-color-gradient-end: rgba(102, 102, 255, 0.05);
+    --primary-color-border: rgba(102, 102, 255, 0.2);
+    
+    /* Base Colors */
+    --color-white: #ffffff;
+    --color-black: #000000;
+    --color-transparent: transparent;
+    
+    /* Gray Scale */
+    --color-gray-100: #f5f5f5;
+    --color-gray-200: #f0f0f0;
+    --color-gray-300: #e5e5e5;
+    --color-gray-400: #e0e0e0;
+    --color-gray-500: #ddd;
+    --color-gray-600: #d0d0d0;
+    --color-gray-700: #ccc;
+    --color-gray-800: #ececec;
+    --color-gray-900: #CCCCCC;
+    
+    /* Text Colors */
+    --color-text-primary: #333;
+    --color-text-secondary: #666;
+    --color-text-tertiary: #555;
+    --color-text-quaternary: #444;
+    --color-text-light: #777;
+    --color-text-disabled: #999;
+    --color-text-info: #666666;
+    
+    /* Status Colors */
+    --color-success: #4CAF50;
+    --color-success-dark: #45a049;
+    --color-error: #ff4444;
+    --color-warning: #FFA500;
+    --color-orange: #FF6600;
+    --color-orange-light: #F5A623;
+    
+    /* Accent Colors */
+    --color-blue: var(--primary-color);
+    --color-brown: #8B4513;
+    --color-red: #ff0000;
+    --color-red-dark: #404040;
+    
+    /* Background Colors */
+    --bg-white: #ffffff;
+    --bg-white-95: rgba(255, 255, 255, 0.95);
+    --bg-white-92: rgba(255, 255, 255, 0.92);
+    --bg-white-90: rgba(255, 255, 255, 0.9);
+    --bg-white-80: rgba(255, 255, 255, 0.8);
+    --bg-gray-light: #f5f5f5;
+    --bg-gray-lighter: #f0f0f0;
+    --bg-gray-lightest: rgba(246, 246, 255, 0.6);
+    
+    /* Shadow Colors */
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+    --shadow-dark: rgba(0, 0, 0, 0.2);
+    --shadow-tooltip: rgba(0, 0, 0, 0.85);
+    --shadow-very-light: rgba(0, 0, 0, 0.08);
+    
+    /* Overlay Colors */
+    --overlay-black-10: rgba(0, 0, 0, 0.1);
+    --overlay-black-85: rgba(0, 0, 0, 0.85);
+    --overlay-white-20: rgba(255, 255, 255, 0.2);
+    
+    /* Common Button Styles - for top, left, and bottom floating bars */
+    --btn-size: 2.25rem;
+    --btn-icon-size: 1.25rem;
+    --btn-border-width: 0.0625rem;
+    --btn-border-width-active: 0.125rem;
+    --btn-border-radius: 0.25rem;
+    --btn-gap: 0.375rem;
+    --btn-bg: var(--color-white);
+    --btn-bg-hover: var(--bg-gray-light);
+    --btn-bg-active: var(--primary-color-light);
+    --btn-bg-toggle-active: var(--primary-color);
+    --btn-border-color: var(--primary-color);
+    --btn-shadow: 0 0.125rem 0.25rem var(--shadow-light);
+    --btn-shadow-hover: 0 0.25rem 0.5rem var(--shadow-medium);
+    --btn-transition: all 0.2s;
+    --btn-stroke-width: 2;
+    
+    /* Right Floating Bar Button Styles - common for all right side buttons */
+    --right-btn-padding: 0.625rem 0.9375rem;
+    --right-btn-font-size: 0.875rem;
+    --right-btn-border-radius: 0.3125rem;
+    --right-btn-bg: var(--bg-white-95);
+    --right-btn-bg-hover: var(--primary-color);
+    --right-btn-color: var(--primary-color);
+    --right-btn-color-hover: var(--color-white);
+    --right-btn-border: 0.125rem solid var(--primary-color);
+    --right-btn-border-hover: 0.125rem solid var(--primary-color);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--bg-white);
+    font-family: Arial, sans-serif;
+}
+
+#container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+#canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(100% - var(--sidebar-width, 300px)); /* Exclude sidebar width */
+    height: 100%;
+    display: block;
+    /* Viewport area - sidebar is positioned on top via z-index */
+}
+
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--primary-color);
+    font-size: 1.125rem;
+    z-index: 1000;
+    display: none;
+}
+
+#loading.show {
+    display: block;
+}
+
+#error {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--color-error);
+    font-size: 1rem;
+    z-index: 1001;
+    display: none;
+    text-align: center;
+    max-width: 80%;
+    padding: 1.25rem;
+    background-color: var(--bg-white-95);
+    border: 0.125rem solid var(--color-error);
+    border-radius: 0.3125rem;
+}
+
+#error.show {
+    display: block;
+}
+
+#info {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 1.25rem;
+    color: var(--color-text-info);
+    font-size: 0.75rem;
+    z-index: 1000;
+    background-color: var(--bg-white-80);
+    padding: 0.3125rem 0.625rem;
+    border-radius: 0.1875rem;
+}
+
+#preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    pointer-events: none;
+    display: none;
+}
+
+#preview-overlay.active {
+    display: block;
+}
+
+#preview-dimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#preview-box {
+    position: absolute;
+    border: 0.0625rem solid var(--color-gray-900);
+    background-color: transparent;
+    pointer-events: none;
+}
+
+#left-toolbar {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: var(--btn-gap);
+}
+
+.toolbar-btn {
+    width: var(--btn-size);
+    height: var(--btn-size);
+    background-color: var(--btn-bg);
+    border: var(--btn-border-width) solid var(--btn-border-color);
+    border-radius: var(--btn-border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--btn-transition);
+    box-shadow: var(--btn-shadow);
+}
+
+.toolbar-btn:hover {
+    background-color: var(--btn-bg-hover);
+    box-shadow: var(--btn-shadow-hover);
+}
+
+.toolbar-btn.active {
+    border: var(--btn-border-width-active) solid var(--btn-border-color);
+    background-color: var(--btn-bg-active);
+}
+
+.toolbar-btn svg {
+    width: var(--btn-icon-size);
+    height: var(--btn-icon-size);
+    stroke: var(--color-text-primary);
+    fill: none;
+    stroke-width: var(--btn-stroke-width);
+}
+
+.toolbar-btn.active svg {
+    stroke: var(--primary-color);
+}
+
+/* Left toolbar buttons - same style as top controls */
+#left-toolbar .toolbar-btn {
+    position: relative;
+}
+
+#left-toolbar .toolbar-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 2.8125rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--shadow-tooltip);
+    color: white;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.25rem;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1001;
+}
+
+/* Use title attribute if data-tooltip is not present */
+#left-toolbar .toolbar-btn:not([data-tooltip])::after {
+    content: attr(title);
+}
+
+/* Hide tooltip if both data-tooltip and title are empty */
+#left-toolbar .toolbar-btn:not([data-tooltip]):not([title])::after {
+    display: none;
+}
+
+#left-toolbar .toolbar-btn:hover::after {
+    opacity: 1;
+}
+
+#left-toolbar .toolbar-btn svg {
+    stroke: var(--color-text-primary);
+    fill: none;
+    stroke-width: var(--btn-stroke-width);
+}
+
+#left-toolbar .toolbar-btn.active {
+    border: var(--btn-border-width-active) solid var(--btn-border-color);
+    background-color: var(--btn-bg-active);
+}
+
+#left-toolbar .toolbar-btn.active svg {
+    stroke: var(--primary-color);
+}
+
+/* For left-toolbar toggle-mode buttons (Select Tool, Cursor Tool) - fill background when active */
+#left-toolbar .toolbar-btn.toggle-mode.active {
+    border: var(--btn-border-width-active) dashed var(--btn-border-color);
+    background-color: var(--btn-bg-toggle-active) !important;
+}
+
+#left-toolbar .toolbar-btn.toggle-mode.active svg path,
+#left-toolbar .toolbar-btn.toggle-mode.active svg line:not(.cursor-axis-line),
+#left-toolbar .toolbar-btn.toggle-mode.active svg circle:not(.cursor-red-circle) {
+    stroke: white !important;
+}
+
+/* Keep red circle red and dark grey lines in cursor tool icon even when active */
+#left-toolbar .toolbar-btn.toggle-mode.active#cursor-tool svg .cursor-red-circle {
+    stroke: var(--color-red) !important;
+}
+#left-toolbar .toolbar-btn.toggle-mode.active#cursor-tool svg .cursor-axis-line {
+    stroke: var(--color-red-dark) !important;
+}
+
+#left-toolbar .toolbar-btn.toggle-mode.active svg circle[fill],
+#left-toolbar .toolbar-btn.toggle-mode.active svg path[fill] {
+    fill: white !important;
+}
+
+#left-toolbar .toolbar-btn:hover {
+    background-color: var(--btn-bg-hover);
+}
+
+#left-toolbar .toolbar-btn.active:hover {
+    background-color: var(--btn-bg-active);
+}
+
+#left-toolbar .toolbar-btn.toggle-mode.active:hover {
+    background-color: var(--btn-bg-toggle-active) !important;
+}
+
+#top-controls {
+    position: absolute;
+    top: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: row;
+    gap: var(--btn-gap);
+    background-color: transparent;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: none;
+}
+
+#top-controls .toolbar-btn {
+    position: relative;
+}
+
+#top-controls .toolbar-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -2.1875rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--shadow-tooltip);
+    color: white;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.25rem;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1001;
+}
+
+#top-controls .toolbar-btn:hover::after {
+    opacity: 1;
+}
+
+#top-controls .toolbar-btn svg {
+    stroke: var(--color-text-primary);
+    fill: none;
+    stroke-width: var(--btn-stroke-width);
+}
+
+#top-controls .toolbar-btn.active {
+    border: var(--btn-border-width-active) solid var(--btn-border-color);
+    background-color: var(--btn-bg-active);
+}
+
+#top-controls .toolbar-btn.active svg {
+    stroke: var(--primary-color);
+}
+
+/* For Area Zoom, Preview, and Boundary Box - fill background when active */
+#top-controls .toolbar-btn.toggle-mode.active {
+    border: var(--btn-border-width-active) dashed var(--btn-border-color);
+    background-color: var(--btn-bg-toggle-active) !important;
+}
+
+#top-controls .toolbar-btn.toggle-mode.active svg {
+    stroke: white !important;
+}
+
+#top-controls .toolbar-btn:hover {
+    background-color: var(--btn-bg-hover);
+}
+
+#top-controls .toolbar-btn.active:hover {
+    background-color: var(--btn-bg-active);
+}
+
+#top-controls .toolbar-btn.toggle-mode.active:hover {
+    background-color: var(--btn-bg-toggle-active) !important;
+}
+
+/* Section plane floating panel */
+#section-plane-panel {
+    position: absolute;
+    top: 11.25rem;
+    left: calc(50% - 11.25rem);
+    width: 20rem;
+    background-color: var(--bg-white-95);
+    border: 0.0625rem solid var(--color-gray-600);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.75rem 1.5rem var(--shadow-medium);
+    z-index: 1200;
+    display: none;
+    backdrop-filter: blur(0.25rem);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#section-plane-panel.visible {
+    display: block;
+}
+
+#part-photo-panel {
+    position: absolute;
+    top: 11.25rem;
+    left: calc(50% - 11.25rem);
+    width: 20rem;
+    background-color: var(--bg-white-95);
+    border: 0.0625rem solid var(--color-gray-600);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.75rem 1.5rem var(--shadow-medium);
+    z-index: 1200;
+    display: none;
+    overflow: hidden;
+    backdrop-filter: blur(0.25rem);
+    cursor: move;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#part-photo-panel.visible {
+    display: block;
+}
+
+#part-photo-panel-header {
+    cursor: move;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#material-panel {
+    position: absolute;
+    top: 11.25rem;
+    left: calc(50% - 11.25rem);
+    width: 20rem;
+    background-color: var(--bg-white-95);
+    border: 0.0625rem solid var(--color-gray-600);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.75rem 1.5rem var(--shadow-medium);
+    z-index: 1200;
+    display: none;
+    backdrop-filter: blur(0.25rem);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#material-panel.visible {
+    display: block;
+}
+
+#measurement-panel {
+    position: absolute;
+    top: 11.25rem;
+    left: calc(50% - 11.25rem);
+    width: 20rem;
+    background-color: var(--bg-white-95);
+    border: 0.0625rem solid var(--color-gray-600);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.75rem 1.5rem var(--shadow-medium);
+    z-index: 1200;
+    display: none;
+    backdrop-filter: blur(0.25rem);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#measurement-panel.visible {
+    display: block;
+}
+
+.section-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 0.0625rem solid var(--color-gray-300);
+    cursor: move;
+    background: linear-gradient(90deg, var(--primary-color-gradient-start), var(--primary-color-gradient-end));
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.section-panel-header h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.section-panel-actions {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+}
+
+.section-panel-actions button {
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0.125rem 0.25rem;
+}
+
+.section-panel-actions button:hover {
+    color: var(--color-text-primary);
+}
+
+.section-panel-body {
+    padding: 0.75rem 0.875rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.section-group {
+    border: 0.0625rem solid var(--color-gray-800);
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    background-color: var(--bg-gray-lightest);
+}
+
+.section-group .group-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-quaternary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.section-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.625rem;
+}
+
+.section-field label {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    font-weight: 500;
+}
+
+.section-field select,
+.section-field input[type="number"],
+.section-field input[type="range"] {
+    width: 100%;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    font-size: 0.75rem;
+    background: transparent;
+    cursor: pointer;
+}
+
+.section-field.range-field {
+    flex-direction: column;
+}
+
+.section-field.range-field .range-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.section-field.range-field input[type="range"] {
+    flex: 1;
+    accent-color: var(--primary-color);
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+/* Style range inputs to use primary color */
+input[type="range"] {
+    accent-color: var(--primary-color);
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    padding: 0;
+    border: none;
+    margin: 0;
+    height: 1.5rem;
+    width: 100%;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    cursor: pointer;
+    border: 0.125rem solid var(--color-white);
+    box-shadow: 0 0.125rem 0.375rem var(--shadow-medium);
+    margin-top: -0.375rem;
+    position: relative;
+    z-index: 1;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 0.375rem;
+    background: var(--color-gray-300);
+    border-radius: 0.1875rem;
+    cursor: pointer;
+    border: none;
+}
+
+input[type="range"]:focus::-webkit-slider-runnable-track {
+    background: var(--color-gray-400);
+}
+
+/* Firefox */
+input[type="range"]::-moz-range-thumb {
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    cursor: pointer;
+    border: 0.125rem solid var(--color-white);
+    box-shadow: 0 0.125rem 0.375rem var(--shadow-medium);
+}
+
+input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 0.375rem;
+    background: var(--color-gray-300);
+    border-radius: 0.1875rem;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-progress {
+    height: 0.375rem;
+    background: var(--primary-color);
+    border-radius: 0.1875rem;
+}
+
+input[type="range"]:focus {
+    outline: none;
+}
+
+/* Checkbox styling to use primary color */
+input[type="checkbox"] {
+    accent-color: var(--primary-color);
+}
+
+.section-field.range-field input[type="number"] {
+    width: 3.75rem;
+}
+
+.section-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    margin-bottom: 0.625rem;
+}
+
+.section-toggle input {
+    width: 1rem;
+    height: 1rem;
+}
+
+.section-button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.section-button-row button {
+    flex: 1;
+    min-width: calc(50% - 0.5rem);
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 0.0625rem solid var(--primary-color);
+    background-color: var(--color-white);
+    color: var(--primary-color);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.section-button-row button:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.section-box-size {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.375rem;
+}
+
+.section-box-size input {
+    padding: 0.375rem 0.25rem;
+    text-align: center;
+}
+
+.section-helper-text {
+    font-size: 0.6875rem;
+    color: var(--color-text-light);
+}
+
+#controls {
+    position: absolute;
+    top: 9.6875rem; /* Below viewport indicator (7.5rem + 1.25rem top + 0.9375rem gap) */
+    right: 20rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    width: 7.5rem;
+    align-items: stretch;
+}
+
+#control-indicator {
+    padding: 0.5rem;
+    background-color: var(--bg-white-92);
+    border: var(--right-btn-border);
+    border-radius: var(--right-btn-border-radius);
+    box-shadow: var(--btn-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+    aspect-ratio: 1;
+    max-height: 7.5rem; /* Increased from 5.625rem (90px) to 7.5rem (120px) */
+}
+
+#control-indicator canvas {
+    width: 100%;
+    height: 100%;
+    max-width: 6.5rem; /* Increased from 4.625rem (74px) to 6.5rem (104px) */
+    max-height: 6.5rem; /* Increased from 4.625rem (74px) to 6.5rem (104px) */
+    display: block;
+}
+
+.sr-only {
+    position: absolute;
+    width: 0.0625rem;
+    height: 0.0625rem;
+    padding: 0;
+    margin: -0.0625rem;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.control-btn {
+    padding: var(--right-btn-padding);
+    background-color: var(--right-btn-bg);
+    border: var(--right-btn-border);
+    border-radius: var(--right-btn-border-radius);
+    color: var(--right-btn-color);
+    font-size: var(--right-btn-font-size);
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--btn-transition);
+    min-width: 7.5rem;
+    text-align: center;
+}
+
+.control-btn:hover {
+    background-color: var(--right-btn-bg-hover);
+    color: var(--right-btn-color-hover);
+    border: var(--right-btn-border-hover);
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+.control-btn.active {
+    background-color: var(--color-success);
+    color: white;
+    border-color: var(--color-success);
+}
+
+/* Part Photo button - material box design when active */
+.control-btn[onclick*="togglePartPhotoPanel"].active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Material button - material box design when active */
+.control-btn[onclick*="toggleMaterialPanel"].active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+#file-input {
+    display: none;
+}
+
+#sidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 18.75rem;
+    min-width: 200px;
+    max-width: 50%;
+    height: 100%;
+    background-color: var(--bg-white-95);
+    border-left: 0.125rem solid var(--primary-color);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#sidebar-resize-handle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background-color: transparent;
+    cursor: col-resize;
+    z-index: 1000;
+    user-select: none;
+}
+
+#sidebar-resize-handle:hover {
+    background-color: var(--primary-color);
+    opacity: 0.5;
+}
+
+#sidebar-resize-handle:active {
+    background-color: var(--primary-color);
+    opacity: 0.8;
+}
+
+#sidebar-header {
+    padding: 0.9375rem;
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    border-bottom: 0.125rem solid var(--primary-color-dark);
+}
+
+#tree-search {
+    padding: 0.5rem;
+    background-color: var(--bg-gray-light);
+    border-bottom: 0.0625rem solid var(--color-gray-500);
+}
+
+#tree-search-input {
+    width: 100%;
+    padding: 0.375rem 0.625rem;
+    border: 0.0625rem solid var(--color-gray-700);
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    box-sizing: border-box;
+}
+
+#tree-search-input:focus {
+    outline: none;
+    border-color: var(--color-success);
+}
+
+#tree-container {
+    padding: 0.625rem;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    min-height: 0;
+}
+
+.tree-item {
+    cursor: pointer;
+    border-bottom: 0.0625rem solid var(--color-gray-500);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.tree-item:hover {
+    background-color: var(--bg-gray-lighter);
+}
+
+.tree-item.selected {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.tree-item.hidden {
+    opacity: 0.4;
+    color: var(--color-text-disabled);
+}
+
+.tree-item.dragging {
+    opacity: 0.5;
+}
+
+.tree-item.drop-target {
+    background-color: var(--color-warning);
+    color: white;
+}
+
+.tree-item-expand {
+    width: 1.5rem; /* Increased from 1.125rem (18px) to 1.5rem (24px) */
+    height: 1.5rem; /* Increased from 1.125rem (18px) to 1.5rem (24px) */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    margin-right: 0.0625rem; /* Reduced from 0.125rem (2px) to 0.0625rem (1px) - less gap */
+    padding: 0;
+    color: var(--color-text-secondary);
+    position: relative;
+}
+
+.tree-item-expand:hover {
+    color: var(--color-text-primary);
+}
+
+.tree-item-expand svg {
+    width: 1.25rem; /* Increased from 0.875rem (14px) to 1.25rem (20px) */
+    height: 1.25rem; /* Increased from 0.875rem (14px) to 1.25rem (20px) */
+    transition: transform 0.2s;
+}
+
+/* Vertical line for child items - extends through all children */
+.tree-item[data-level] {
+    position: relative;
+}
+
+/* Vertical line on left side of children - extends from top to bottom */
+.tree-item[data-level]::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--expand-pos, 0rem) + 0.5625rem);
+    top: 0;
+    bottom: 0;
+    width: 0.0625rem;
+    border-left: 0.0625rem dashed var(--color-gray-700);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Horizontal line connecting child to vertical line */
+.tree-item[data-level]::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--expand-pos, 0rem) + 0.5625rem);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.5rem;
+    height: 0.0625rem;
+    border-top: 0.0625rem dashed var(--color-gray-700);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Hide vertical line for last child - only show to item center */
+.tree-item[data-level]:last-child::before {
+    height: 50%;
+}
+
+.tree-item-icon {
+    width: 1rem;
+    height: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+}
+
+.tree-item-icon-svg {
+    width: 1rem;
+    height: 1rem;
+    stroke: var(--color-text-secondary);
+    fill: none;
+}
+
+.tree-item-icon-svg[data-type="file"] {
+    stroke: var(--color-blue);
+}
+
+.tree-item-icon-svg[data-type="folder"] {
+    stroke: var(--color-orange-light);
+    fill: var(--color-orange-light);
+    fill-opacity: 0.2;
+}
+
+.tree-item-icon-svg[data-type="box"] {
+    stroke: var(--color-brown);
+}
+
+.tree-item-name {
+    flex: 1;
+    font-size: 0.625rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    color: var(--color-black); /* Keep file names black */
+}
+
+.tree-item.hidden-tree-item {
+    display: none;
+}
+
+.tree-item-toggle {
+    padding: 0.25rem;
+    background-color: transparent;
+    color: var(--color-text-primary);
+    border: none;
+    border-radius: 0.1875rem;
+    cursor: pointer;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: auto;
+    position: relative;
+}
+
+.tree-item-toggle svg {
+    width: 1rem;
+    height: 1rem;
+    stroke: currentColor;
+    fill: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tree-item-toggle.hidden svg {
+    opacity: 0.4;
+}
+
+.tree-item-toggle:hover {
+    background-color: var(--overlay-black-10);
+}
+
+.tree-item.selected .tree-item-toggle svg {
+    stroke: white;
+}
+
+.tree-item.selected .tree-item-toggle:hover {
+    background-color: var(--overlay-white-20);
+}
+
+#sidebar-bottom {
+    border-top: 0.125rem solid var(--primary-color);
+    padding: 0.625rem;
+    background-color: var(--bg-gray-light);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    position: relative;
+    min-height: 3rem;
+    max-height: 50%;
+}
+
+#sidebar-bottom-resize-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    cursor: row-resize;
+    background-color: transparent;
+    z-index: 1001;
+    user-select: none;
+}
+
+#sidebar-bottom-resize-handle:hover {
+    background-color: var(--primary-color);
+    opacity: 0.5;
+}
+
+#sidebar-bottom-resize-handle:active {
+    background-color: var(--primary-color);
+    opacity: 0.8;
+}
+
+.sidebar-btn {
+    padding: var(--right-btn-padding);
+    background-color: var(--right-btn-bg);
+    border: var(--right-btn-border);
+    border-radius: var(--right-btn-border-radius);
+    color: var(--right-btn-color);
+    font-size: var(--right-btn-font-size);
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--btn-transition);
+    flex: 1;
+    min-width: 5rem;
+}
+
+.sidebar-btn:hover {
+    background-color: var(--right-btn-bg-hover);
+    color: var(--right-btn-color-hover);
+    border: var(--right-btn-border-hover);
+}
+
+.sidebar-btn:active {
+    transform: scale(0.95);
+}
+
+#context-menu {
+    position: absolute;
+    background-color: var(--color-white);
+    border: 0.125rem solid var(--primary-color);
+    border-radius: 0.3125rem;
+    box-shadow: 0 0.25rem 0.5rem var(--shadow-dark);
+    z-index: 10002;
+    display: none;
+    min-width: 8.75rem;
+    max-width: 10rem;
+    padding: 0.1875rem 0;
+    font-size: 0.75rem;
+}
+
+#axis-context-menu {
+    position: absolute;
+    background-color: var(--color-white);
+    border: 0.125rem solid var(--primary-color);
+    border-radius: 0.3125rem;
+    box-shadow: 0 0.25rem 0.5rem var(--shadow-dark);
+    z-index: 10002;
+    display: none;
+    min-width: 9.375rem;
+    padding: 0.3125rem 0;
+}
+
+/* Bottom Bar Container - Groups all bottom bar buttons together */
+#bottom-bar-container {
+    position: absolute;
+    bottom: 1.25rem;
+    right: 320px; /* Initial: 300px sidebar + 20px margin - will be updated by JavaScript */
+    display: flex;
+    flex-direction: row-reverse; /* Reverse order so rightmost button is first */
+    gap: 0.625rem; /* Gap between buttons */
+    align-items: center;
+    z-index: 1001;
+    /* JavaScript will override 'right' property dynamically */
+}
+
+/* Bottom bar container buttons - ensure consistent styling */
+#bottom-bar-container .toolbar-btn {
+    position: relative;
+    width: var(--btn-size);
+    height: var(--btn-size);
+    background-color: var(--btn-bg);
+    border: var(--btn-border-width) solid var(--btn-border-color);
+    border-radius: var(--btn-border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--btn-transition);
+    box-shadow: var(--btn-shadow);
+    padding: 0;
+}
+
+#bottom-bar-container .toolbar-btn:hover {
+    background-color: var(--btn-bg-hover);
+    box-shadow: var(--btn-shadow-hover);
+}
+
+#bottom-bar-container .toolbar-btn.active {
+    border: var(--btn-border-width-active) solid var(--btn-border-color);
+    background-color: var(--btn-bg-active);
+}
+
+#bottom-bar-container .toolbar-btn.toggle-mode.active {
+    border: var(--btn-border-width-active) dashed var(--btn-border-color);
+    background-color: var(--btn-bg-toggle-active) !important;
+}
+
+#bottom-bar-container .toolbar-btn svg {
+    width: var(--btn-icon-size);
+    height: var(--btn-icon-size);
+    stroke: var(--color-text-primary);
+    fill: none;
+    stroke-width: var(--btn-stroke-width);
+}
+
+#bottom-bar-container .toolbar-btn.active svg {
+    stroke: white !important;
+}
+
+#bottom-bar-container .toolbar-btn.toggle-mode.active svg {
+    stroke: white !important;
+}
+
+/* Axis Hide Button - Bottom Edge (in viewport area, not sidebar) */
+#axis-hide-btn {
+    position: relative; /* Changed from absolute to relative */
+    bottom: auto;
+    right: auto;
+    width: var(--btn-size);
+    height: var(--btn-size);
+    background-color: var(--btn-bg);
+    border: var(--btn-border-width) solid var(--btn-border-color);
+    border-radius: var(--btn-border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transition: var(--btn-transition);
+    padding: 0;
+}
+
+#axis-hide-btn:hover:not(:disabled) {
+    background-color: var(--btn-bg-hover);
+    border-color: var(--btn-border-color);
+    box-shadow: var(--btn-shadow-hover);
+}
+
+#axis-hide-btn.active {
+    background-color: var(--btn-bg-toggle-active);
+    border-color: var(--btn-border-color);
+}
+
+#axis-hide-btn.active svg {
+    stroke: white;
+}
+
+#axis-hide-btn svg {
+    width: var(--btn-icon-size);
+    height: var(--btn-icon-size);
+    stroke: var(--color-text-primary);
+    fill: none;
+    stroke-width: var(--btn-stroke-width);
+}
+
+/* Tooltip for axis hide button */
+#axis-hide-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 0.3125rem;
+    background-color: var(--shadow-tooltip);
+    color: white;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.25rem;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1002;
+}
+
+#axis-hide-btn:hover::after {
+    opacity: 1;
+}
+
+/* Cursor Hide Button - Bottom Edge (next to Axis Hide) */
+#cursor-hide-btn {
+    position: relative; /* Changed from absolute to relative */
+    bottom: auto;
+    right: auto;
+    width: var(--btn-size);
+    height: var(--btn-size);
+    background-color: var(--btn-bg);
+    border: var(--btn-border-width) solid var(--btn-border-color);
+    border-radius: var(--btn-border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transition: var(--btn-transition);
+    padding: 0;
+}
+
+#cursor-hide-btn:hover {
+    background-color: var(--btn-bg-hover);
+    border-color: var(--btn-border-color);
+    box-shadow: var(--btn-shadow-hover);
+}
+
+#cursor-hide-btn.active {
+    background-color: var(--btn-bg-toggle-active);
+    border-color: var(--btn-border-color);
+}
+
+#cursor-hide-btn.active svg {
+    stroke: white;
+}
+
+#cursor-hide-btn svg {
+    width: var(--btn-icon-size);
+    height: var(--btn-icon-size);
+    stroke: var(--color-text-primary);
+    fill: none;
+    stroke-width: var(--btn-stroke-width);
+}
+
+/* Tooltip for cursor hide button */
+#cursor-hide-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 0.3125rem;
+    background-color: var(--shadow-tooltip);
+    color: white;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.25rem;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1002;
+}
+
+#cursor-hide-btn:hover::after {
+    opacity: 1;
+}
+
+/* Rotation Pivot Hide Button - Bottom Edge (next to Cursor Hide) */
+#rotation-pivot-hide-btn {
+    position: relative; /* Changed from absolute to relative */
+    bottom: auto;
+    right: auto;
+    width: var(--btn-size);
+    height: var(--btn-size);
+    background-color: var(--btn-bg);
+    border: var(--btn-border-width) solid var(--btn-border-color);
+    border-radius: var(--btn-border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transition: var(--btn-transition);
+    padding: 0;
+}
+
+#rotation-pivot-hide-btn:hover {
+    background-color: var(--btn-bg-hover);
+    border-color: var(--btn-border-color);
+    box-shadow: var(--btn-shadow-hover);
+}
+
+#rotation-pivot-hide-btn.active {
+    background-color: var(--btn-bg-toggle-active);
+    border-color: var(--btn-border-color);
+}
+
+#rotation-pivot-hide-btn.active svg rect {
+    stroke: white; /* White rectangle when active */
+}
+
+#rotation-pivot-hide-btn.active svg circle {
+    fill: white; /* White center dot when active */
+}
+
+#rotation-pivot-hide-btn svg {
+    width: var(--btn-icon-size);
+    height: var(--btn-icon-size);
+    stroke: var(--color-text-secondary); /* Gray stroke for inactive */
+    fill: var(--color-text-secondary); /* Gray fill for inactive */
+    stroke-width: var(--btn-stroke-width);
+}
+
+#rotation-pivot-hide-btn svg rect {
+    stroke: var(--color-orange); /* Orange rectangle */
+}
+
+#rotation-pivot-hide-btn svg circle {
+    fill: var(--color-orange); /* Orange center dot */
+}
+
+/* Tooltip for rotation pivot hide button */
+#rotation-pivot-hide-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 0.3125rem;
+    background-color: var(--shadow-tooltip);
+    color: white;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.25rem;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1002;
+}
+
+#rotation-pivot-hide-btn:hover::after {
+    opacity: 1;
+}
+
+/* Rotation Mode Selector - 4-cell box */
+#rotation-mode-selector {
+    position: relative; /* Changed from absolute to relative - now inside container */
+    bottom: auto;
+    right: auto;
+    display: flex;
+    gap: 0;
+    background-color: var(--bg-white-95);
+    border: var(--btn-border-width-active) solid var(--btn-border-color);
+    border-radius: var(--btn-border-radius);
+    box-shadow: var(--btn-shadow);
+    z-index: 1001;
+    overflow: visible; /* Allow tooltips to show outside container */
+}
+
+.rotation-mode-cell {
+    width: var(--btn-size);
+    height: var(--btn-size);
+    min-width: var(--btn-size);
+    min-height: var(--btn-size);
+    max-width: var(--btn-size);
+    max-height: var(--btn-size);
+    background-color: var(--btn-bg);
+    border: none;
+    border-right: var(--btn-border-width) solid var(--primary-color-border);
+    border-radius: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--btn-transition);
+    position: relative;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    line-height: 1;
+    box-sizing: border-box;
+    font-size: 0;
+    vertical-align: top;
+}
+
+.rotation-mode-cell:last-child {
+    border-right: none;
+}
+
+.rotation-mode-cell:hover {
+    background-color: var(--btn-bg-hover);
+}
+
+.rotation-mode-cell.active {
+    background-color: var(--btn-bg-toggle-active);
+}
+
+.rotation-mode-cell svg {
+    width: var(--btn-icon-size);
+    height: var(--btn-icon-size);
+    stroke: var(--color-text-primary);
+    fill: none;
+    stroke-width: var(--btn-stroke-width);
+}
+
+.rotation-mode-cell.active svg {
+    stroke: white;
+}
+
+/* Tooltip for rotation mode cells */
+.rotation-mode-cell::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 0.3125rem;
+    background-color: var(--shadow-tooltip);
+    color: white;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.25rem;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1002;
+}
+
+.rotation-mode-cell:hover::after {
+    opacity: 1;
+}
+
+#assembly-name-input-container {
+    position: absolute;
+    background-color: var(--color-white);
+    border: 0.125rem solid var(--primary-color);
+    border-radius: 0.3125rem;
+    box-shadow: 0 0.25rem 0.5rem var(--shadow-dark);
+    z-index: 10003;
+    display: none;
+    padding: 0.625rem;
+    min-width: 12.5rem;
+}
+
+#assembly-name-input-container input {
+    width: 100%;
+    padding: 0.375rem;
+    border: 0.0625rem solid var(--color-gray-700);
+    border-radius: 0.1875rem;
+    font-size: 0.8125rem;
+    margin-bottom: 0.5rem;
+    box-sizing: border-box;
+}
+
+#assembly-name-input-container .input-buttons {
+    display: flex;
+    gap: 0.3125rem;
+    justify-content: flex-end;
+}
+
+#assembly-name-input-container button {
+    padding: 0.3125rem 0.75rem;
+    border: 0.0625rem solid var(--primary-color);
+    border-radius: 0.1875rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    background-color: var(--bg-gray-lighter);
+}
+
+#assembly-name-input-container button:hover {
+    background-color: var(--color-gray-400);
+}
+
+#assembly-name-input-container button.primary {
+    background-color: var(--color-success);
+    color: white;
+    border-color: var(--color-success);
+}
+
+#assembly-name-input-container button.primary:hover {
+    background-color: var(--color-success-dark);
+}
+
+#move-assembly-container {
+    position: absolute;
+    background-color: var(--color-white);
+    border: 0.125rem solid var(--primary-color);
+    border-radius: 0.3125rem;
+    box-shadow: 0 0.25rem 0.5rem var(--shadow-dark);
+    z-index: 10003;
+    display: none;
+    padding: 0.625rem;
+    min-width: 13.75rem;
+    max-height: 25rem;
+    overflow-y: auto;
+}
+
+#move-assembly-container .assembly-list {
+    max-height: 15.625rem;
+    overflow-y: auto;
+    margin-bottom: 0.625rem;
+    border: 0.0625rem solid var(--color-gray-500);
+    border-radius: 0.1875rem;
+    padding: 0.3125rem;
+}
+
+#move-assembly-container .assembly-item {
+    padding: 0.375rem 0.5rem;
+    cursor: pointer;
+    border-radius: 0.1875rem;
+    margin-bottom: 0.125rem;
+    font-size: 0.75rem;
+    color: var(--primary-color);
+}
+
+#move-assembly-container .assembly-item:hover {
+    background-color: var(--bg-gray-lighter);
+}
+
+#move-assembly-container .assembly-item.selected {
+    background-color: var(--color-success);
+    color: white;
+}
+
+#move-assembly-container .separator-text {
+    font-size: 0.6875rem;
+    color: var(--color-text-secondary);
+    margin: 0.5rem 0 0.3125rem 0;
+    font-weight: bold;
+}
+
+#move-assembly-container input {
+    width: 100%;
+    padding: 0.375rem;
+    border: 0.0625rem solid var(--color-gray-700);
+    border-radius: 0.1875rem;
+    font-size: 0.8125rem;
+    margin-bottom: 0.5rem;
+    box-sizing: border-box;
+}
+
+#move-assembly-container .input-buttons {
+    display: flex;
+    gap: 0.3125rem;
+    justify-content: flex-end;
+}
+
+#move-assembly-container button {
+    padding: 0.3125rem 0.75rem;
+    border: 0.0625rem solid var(--primary-color);
+    border-radius: 0.1875rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    background-color: var(--bg-gray-lighter);
+}
+
+#move-assembly-container button:hover {
+    background-color: var(--color-gray-400);
+}
+
+#move-assembly-container button.primary {
+    background-color: var(--color-success);
+    color: white;
+    border-color: var(--color-success);
+}
+
+#move-assembly-container button.primary:hover {
+    background-color: var(--color-success-dark);
+}
+
+#rename-input-container {
+    position: absolute;
+    background-color: var(--color-white);
+    border: 0.125rem solid var(--primary-color);
+    border-radius: 0.3125rem;
+    box-shadow: 0 0.25rem 0.5rem var(--shadow-dark);
+    z-index: 10003;
+    display: none;
+    padding: 0.625rem;
+    min-width: 12.5rem;
+}
+
+#rename-input-container input {
+    width: 100%;
+    padding: 0.375rem;
+    border: 0.0625rem solid var(--color-gray-700);
+    border-radius: 0.1875rem;
+    font-size: 0.8125rem;
+    margin-bottom: 0.5rem;
+    box-sizing: border-box;
+}
+
+#rename-input-container .input-buttons {
+    display: flex;
+    gap: 0.3125rem;
+    justify-content: flex-end;
+}
+
+#rename-input-container button {
+    padding: 0.3125rem 0.75rem;
+    border: 0.0625rem solid var(--primary-color);
+    border-radius: 0.1875rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    background-color: var(--bg-gray-lighter);
+}
+
+#rename-input-container button:hover {
+    background-color: var(--color-gray-400);
+}
+
+#rename-input-container button.primary {
+    background-color: var(--color-success);
+    color: white;
+    border-color: var(--color-success);
+}
+
+#rename-input-container button.primary:hover {
+    background-color: var(--color-success-dark);
+}
+
+.context-menu-item {
+    padding: 0.3125rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    user-select: none;
+}
+
+.context-menu-item:hover {
+    background-color: var(--bg-gray-lighter);
+}
+
+.context-menu-item.disabled {
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+}
+
+.context-menu-item.disabled:hover {
+    background-color: transparent;
+}
+
+.context-menu-separator {
+    height: 0.0625rem;
+    background-color: var(--color-gray-500);
+    margin: 0.125rem 0;
+}
+
+/* Color Wheel Picker Styles */
+.color-picker-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin-top: 0.5rem;
+}
+
+.color-picker-row {
+    display: flex;
+    gap: 0.625rem;
+    align-items: flex-start;
+}
+
+.color-wheel-wrapper {
+    position: relative;
+    width: 12.5rem;
+    height: 12.5rem;
+    cursor: crosshair;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 0.125rem 0.5rem var(--shadow-light);
+    border: 0.125rem solid var(--color-gray-300);
+}
+
+#material-color-wheel {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 50%;
+}
+
+.color-wheel-indicator {
+    position: absolute;
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 0.125rem solid var(--color-white);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 0.0625rem var(--color-black), 0 0.125rem 0.25rem var(--shadow-medium);
+    z-index: 10;
+}
+
+.color-slider-wrapper {
+    position: relative;
+    width: 1.875rem;
+    height: 12.5rem;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    box-shadow: 0 0.125rem 0.5rem var(--shadow-light);
+    border: 0.125rem solid var(--color-gray-300);
+}
+
+#material-color-slider {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.color-slider-indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 0.25rem;
+    border-top: 0.125rem solid var(--color-white);
+    border-bottom: 0.125rem solid var(--color-white);
+    pointer-events: none;
+    transform: translateY(-50%);
+    box-shadow: 0 0 0 0.0625rem var(--color-black);
+    z-index: 10;
+}
+
+.color-preview-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.color-preview-box {
+    width: 3.75rem;
+    height: 2rem;
+    border-radius: 0.25rem;
+    border: 0.125rem solid var(--color-gray-300);
+    box-shadow: 0 0.125rem 0.25rem var(--shadow-light);
+    background-color: #ff0000;
+    flex-shrink: 0;
+}
+
+.color-rgb-inputs {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.rgb-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.rgb-input-group label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+}
+
+.rgb-input {
+    width: 3.5rem;
+    padding: 0.375rem 0.5rem;
+    border: 0.0625rem solid var(--color-gray-300);
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    text-align: center;
+    background-color: var(--bg-white);
+    color: var(--color-text-primary);
+    transition: var(--btn-transition);
+}
+
+.rgb-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.125rem var(--primary-color-light);
+}
+
+.rgb-input::-webkit-inner-spin-button,
+.rgb-input::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 1.25rem;
+}
+
+#controls {
+    position: absolute;
+    top: 9.6875rem;
+    right: 20rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    width: 7.5rem;
+    align-items: stretch;
+}
+

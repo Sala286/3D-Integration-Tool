@@ -1,0 +1,10 @@
+# To maintain pip 25.2, run:
+# python -m pip install pip==25.2
+
+# To suppress upgrade notices, you can disable them:
+# python -m pip install --upgrade pip --quiet
+# OR
+# Set environment variable: PIP_NO_WARN_SCRIPT_LOCATION=1
+
+# Current pip version: 25.2 (maintained)
+

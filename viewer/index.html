@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Integration Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="container">
+        <canvas id="canvas"></canvas>
+        <div id="loading" class="show">Loading...</div>
+        <div id="error"></div>
+        <div id="info">3D Integration Tool - Use mouse to rotate, scroll to zoom</div>
+        
+        <!-- Preview overlay -->
+        <div id="preview-overlay">
+            <div id="preview-dimmer"></div>
+            <div id="preview-box"></div>
+        </div>
+        
+        <!-- Left Floating Toolbar -->
+        <div id="left-toolbar">
+            <button class="toolbar-btn toggle-mode active" id="select-tool" title="Select Tool">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn toggle-mode" id="cursor-tool" title="Cursor (Click on mesh to place point)">
+                <svg viewBox="0 0 24 24">
+                    <!-- Red dotted circle (dashed) -->
+                    <circle class="cursor-red-circle" cx="12" cy="12" r="8" fill="none" stroke="#ff0000" stroke-width="1.5" stroke-dasharray="2 2"/>
+                    <!-- Dark grey axis lines that don't join at center -->
+                    <line class="cursor-axis-line" x1="4" y1="12" x2="8" y2="12" stroke="#404040" stroke-width="1.5" stroke-linecap="round"/>
+                    <line class="cursor-axis-line" x1="16" y1="12" x2="20" y2="12" stroke="#404040" stroke-width="1.5" stroke-linecap="round"/>
+                    <line class="cursor-axis-line" x1="12" y1="4" x2="12" y2="8" stroke="#404040" stroke-width="1.5" stroke-linecap="round"/>
+                    <line class="cursor-axis-line" x1="12" y1="16" x2="12" y2="20" stroke="#404040" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn toggle-mode" id="move-tool" data-tooltip="Move (Part location move)" onclick="toggleMoveTool()" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="8" y="8" width="8" height="8" fill="none" stroke-width="1.5"/>
+                    <path d="M12 4v4M12 16v4M4 12h4M16 12h4" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn toggle-mode" id="rotate-tool" data-tooltip="Rotate (Part rotate)" onclick="toggleRotateTool()" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z" fill="none" stroke-width="1.5"/>
+                    <path d="M12 4v4M8 8l4-4M16 8l-4-4" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M12 20v-4M8 16l4 4M16 16l-4 4" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn toggle-mode" id="transform-tool" data-tooltip="Transform (Move and rotate both)" onclick="toggleTransformTool()" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="6" y="6" width="12" height="12" fill="none" stroke-width="1.5"/>
+                    <rect x="9" y="9" width="6" height="6" fill="none" stroke-width="1.5"/>
+                    <path d="M6 6l3 3M18 6l-3 3M6 18l3-3M18 18l-3-3" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn toggle-mode" id="scale-tool" data-tooltip="Scale (Part scale)" onclick="toggleScaleTool()" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="7" y="7" width="10" height="10" fill="none" stroke-width="1.5"/>
+                    <rect x="4" y="4" width="3" height="3"/>
+                    <rect x="17" y="4" width="3" height="3"/>
+                    <rect x="4" y="17" width="3" height="3"/>
+                    <rect x="17" y="17" width="3" height="3"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="annotation-tool" title="Annotation">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" fill="#4CAF50"/>
+                    <path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#4CAF50"/>
+                    <path d="M12 8c1 2 3 4 5 5" stroke="#4CAF50" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="measurement-tool" title="Measurement">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 3h2v18H3V3zm16 0h2v18h-2V3z" fill="#4CAF50"/>
+                    <path d="M12 2v20M2 12h20" stroke="#4CAF50" stroke-width="1.5" fill="none"/>
+                    <path d="M12 2a10 10 0 0 1 0 20" fill="none" stroke="#4CAF50" stroke-width="1.5"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div id="top-controls">
+            <button class="toolbar-btn" id="reset-view-btn" data-tooltip="Reset View" onclick="resetView()">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 4v6h6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.5 9.5a7 7 0 1 0 2-2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="fit-screen-btn" data-tooltip="Fit Screen" onclick="fitScreen()">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="5" y="5" width="14" height="14" rx="2" ry="2" fill="none"/>
+                    <path d="M9 9h6v6H9z" fill="none"/>
+                    <path d="M12 5v3M12 16v3M5 12h3M16 12h3" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn toggle-mode" id="area-zoom-btn" data-tooltip="Area Zoom" onclick="toggleAreaZoom()" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="6" y="6" width="12" height="12" rx="1.5" ry="1.5" fill="none" stroke-dasharray="3 2"/>
+                    <path d="M15 15l4 4" stroke-linecap="round"/>
+                    <circle cx="14" cy="14" r="2.5" fill="none"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn toggle-mode" id="preview-btn" data-tooltip="Preview" onclick="togglePreview()" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none"/>
+                    <path d="M8 12h8M12 8v8" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn toggle-mode" id="random-color-btn" data-tooltip="Random Colour" onclick="toggleRandomColors()" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="8" cy="12" r="3" fill="#ff6b6b"/>
+                    <circle cx="12" cy="8" r="3" fill="#4ecdc4" opacity="0.85"/>
+                    <circle cx="16" cy="12" r="3" fill="#ffe66d" opacity="0.75"/>
+                    <circle cx="12" cy="16" r="3" fill="#5d5fef" opacity="0.7"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn toggle-mode" id="section-plane-btn" data-tooltip="Section Plane" onclick="toggleSectionPlanePanel()" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2" fill="none"/>
+                    <line x1="6" y1="8" x2="18" y2="16" stroke-linecap="round" />
+                    <line x1="6" y1="16" x2="18" y2="8" stroke-dasharray="2 2" />
+                </svg>
+            </button>
+        </div>
+        
+        <div id="controls">
+            <input type="file" id="file-input" accept=".gltf,.glb" style="display: none;" />
+            <input type="file" id="add-file-input" accept=".gltf,.glb" style="display: none;" />
+            <input type="file" id="import-stl-input" accept=".stl" style="display: none;" />
+            <div id="control-indicator" role="img" aria-label="Viewport axis indicator showing camera orientation">
+                <span class="sr-only">Viewport axis indicator showing camera orientation.</span>
+                <canvas id="control-indicator-canvas" width="120" height="120"></canvas>
+            </div>
+            <button class="control-btn" onclick="requestAddModel()">Add Model</button>
+            <button class="control-btn" onclick="openImportSTLDialog()">Import STL</button>
+            <button class="control-btn" onclick="showExportSTLDialog()">Export STL</button>
+            <button class="control-btn" onclick="exportBoundaryBoxCSV()">BB Export</button>
+            <button class="control-btn" onclick="toggleMaterialPanel()">Material</button>
+            <button class="control-btn" onclick="togglePartPhotoPanel()">Part Photo</button>
+            <button class="control-btn" onclick="captureImage()">Image</button>
+            <button class="control-btn" onclick="alert('Assy function - to be implemented')">Assy</button>
+        </div>
+        
+        <div id="part-photo-panel" aria-hidden="true">
+            <div class="section-panel-header" id="part-photo-panel-header">
+                <h3>Part Photo</h3>
+                <div class="section-panel-actions">
+                    <button id="part-photo-panel-close-btn" title="Close Panel">&times;</button>
+                </div>
+            </div>
+            <div class="section-panel-body">
+                <div class="section-group">
+                    <div class="group-title">Part Selection</div>
+                    <div class="section-field">
+                        <label>
+                            <input type="radio" name="part-photo-mode" value="visible" checked>
+                            <span>Current visible single part</span>
+                        </label>
+                    </div>
+                    <div class="section-field">
+                        <label>
+                            <input type="radio" name="part-photo-mode" value="assembly">
+                            <span>Selected assembly (all parts including sub-assemblies)</span>
+                        </label>
+                    </div>
+                    <div class="section-field">
+                        <label id="part-photo-selection-info" style="color: #6666FF; font-size: 12px;">No part selected</label>
+                    </div>
+                </div>
+                
+                <div class="section-group">
+                    <div class="group-title">View Selection</div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-front" checked>
+                            <span>Front</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-back" checked>
+                            <span>Back</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-left" checked>
+                            <span>Left</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-right" checked>
+                            <span>Right</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-top" checked>
+                            <span>Top</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-bottom" checked>
+                            <span>Bottom</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-iso" checked>
+                            <span>Iso</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-iso2" checked>
+                            <span>Iso2</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-iso3" checked>
+                            <span>Iso3</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-iso4" checked>
+                            <span>Iso4</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-iso5" checked>
+                            <span>Iso5</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-iso6" checked>
+                            <span>Iso6</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-iso7" checked>
+                            <span>Iso7</span>
+                        </label>
+                        <label class="section-toggle">
+                            <input type="checkbox" id="part-photo-view-iso8" checked>
+                            <span>Iso8</span>
+                        </label>
+                    </div>
+                    <div class="section-button-row" style="margin-top: 10px;">
+                        <button id="part-photo-select-all-views" type="button">Select All</button>
+                        <button id="part-photo-deselect-all-views" type="button">Deselect All</button>
+                    </div>
+                </div>
+                
+                <div class="section-group">
+                    <div class="section-button-row">
+                        <button id="part-photo-capture-btn" type="button">Capture Photos</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="material-panel" aria-hidden="true">
+            <div class="section-panel-header" id="material-panel-header">
+                <h3>Material Manager</h3>
+                <div class="section-panel-actions">
+                    <button id="material-panel-close-btn" title="Close Panel">&times;</button>
+                </div>
+            </div>
+            <div class="section-panel-body">
+                <div class="section-group">
+                    <div class="group-title">Part Selection</div>
+                    <div class="section-field">
+                        <label>Selected Part: <span id="material-selected-part" style="color: #6666FF;">None</span></label>
+                    </div>
+                    <div class="section-field">
+                        <label for="material-part-color-select">Apply Color</label>
+                        <div style="position: relative;">
+                            <select id="material-part-color-select" disabled style="width: 100%;">
+                                <option value="">Select a color...</option>
+                            </select>
+                            <div id="material-part-color-dropdown-wrapper" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-radius: 4px; max-height: 300px; overflow: hidden; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-top: 2px;">
+                                <input type="text" id="material-part-color-search" placeholder="Search color..." 
+                                       style="width: 100%; padding: 6px 8px; border: none; border-bottom: 1px solid #ccc; font-size: 13px; box-sizing: border-box; outline: none;"
+                                       disabled>
+                                <div id="material-part-color-options-list" style="max-height: 250px; overflow-y: auto;">
+                                    <!-- Options will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-button-row">
+                        <button id="material-apply-color-btn" type="button" disabled>Apply Color</button>
+                    </div>
+                </div>
+                
+                <div class="section-group">
+                    <div class="group-title">Template</div>
+                    <div class="section-button-row">
+                        <button id="material-import-template-btn" type="button">Import Template</button>
+                        <button id="material-export-template-btn" type="button">Export Template</button>
+                    </div>
+                    <div id="material-csv-select-container" style="display: none; margin-top: 10px;">
+                        <label for="material-csv-file">Select CSV File</label>
+                        <input type="file" id="material-csv-file" accept=".csv" style="width: 100%; margin-top: 5px;">
+                    </div>
+                </div>
+                
+                <div class="section-group">
+                    <div class="group-title">Import & Export</div>
+                    <div class="section-button-row">
+                        <button id="material-export-btn" type="button">Get Part List</button>
+                    </div>
+                    <div class="section-button-row" style="margin-top: 10px;">
+                        <button id="material-bulk-apply-btn" type="button">Bulk Apply</button>
+                    </div>
+                </div>
+                
+                <div class="section-group">
+                    <div class="group-title">Color Library</div>
+                    <div id="material-color-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
+                        <p class="section-helper-text" style="text-align: center; color: #999;">No colors added yet</p>
+                    </div>
+                </div>
+                
+                <div class="section-group">
+                    <div class="group-title">Color Creation</div>
+                    <div class="section-field">
+                        <label for="material-color-name">Color Name</label>
+                        <input type="text" id="material-color-name" placeholder="Enter color name">
+                    </div>
+                    <div class="section-field">
+                        <label for="material-color-picker">Color</label>
+                        <div class="color-picker-container">
+                            <div class="color-picker-row">
+                                <div class="color-wheel-wrapper">
+                                    <canvas id="material-color-wheel" width="200" height="200"></canvas>
+                                    <div class="color-wheel-indicator" id="material-color-wheel-indicator"></div>
+                                </div>
+                                <div class="color-slider-wrapper">
+                                    <canvas id="material-color-slider" width="30" height="200"></canvas>
+                                    <div class="color-slider-indicator" id="material-color-slider-indicator"></div>
+                                </div>
+                            </div>
+                            <div class="color-preview-wrapper">
+                                <div class="color-preview-box" id="material-color-preview"></div>
+                                <input type="color" id="material-color-picker" value="#ff0000" style="display: none;">
+                                <div class="color-rgb-inputs">
+                                    <div class="rgb-input-group">
+                                        <label for="material-color-r">R</label>
+                                        <input type="number" id="material-color-r" min="0" max="255" value="255" class="rgb-input">
+                                    </div>
+                                    <div class="rgb-input-group">
+                                        <label for="material-color-g">G</label>
+                                        <input type="number" id="material-color-g" min="0" max="255" value="0" class="rgb-input">
+                                    </div>
+                                    <div class="rgb-input-group">
+                                        <label for="material-color-b">B</label>
+                                        <input type="number" id="material-color-b" min="0" max="255" value="0" class="rgb-input">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                            <input type="range" id="material-color-alpha" min="0" max="100" value="100" style="flex: 1;">
+                            <span id="material-alpha-value">100%</span>
+                        </div>
+                    </div>
+                    <div class="section-button-row">
+                        <button id="material-add-color-btn" type="button">Add Color</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="section-plane-panel" aria-hidden="true">
+            <div class="section-panel-header" id="section-panel-header">
+                <h3>Section Plane</h3>
+                <div class="section-panel-actions">
+                    <button id="section-panel-reset-btn" title="Reset Section Settings">Reset</button>
+                    <button id="section-panel-close-btn" title="Close Panel">&times;</button>
+                </div>
+            </div>
+            <div class="section-panel-body">
+                <div class="section-group">
+                    <div class="group-title">Cut Plane</div>
+                    <label class="section-toggle">
+                        <input type="checkbox" id="section-plane-enable">
+                        <span>Enable Section Plane</span>
+                    </label>
+                    <div class="section-field">
+                        <label for="section-plane-origin">Anchor</label>
+                        <select id="section-plane-origin">
+                            <option value="world">World Origin</option>
+                            <option value="cursor">3D Cursor</option>
+                        </select>
+                        <p class="section-helper-text">Use cursor anchor to start the cut from cursor location.</p>
+                    </div>
+                    <div class="section-field range-field">
+                        <label for="section-plane-offset">Offset</label>
+                        <div class="range-row">
+                            <input type="range" id="section-plane-offset" min="-100" max="100" step="0.1" value="0">
+                            <input type="number" id="section-plane-offset-value" step="0.1" value="0">
+                        </div>
+                    </div>
+                    <div class="section-field range-field">
+                        <label for="section-plane-yaw">Yaw</label>
+                        <div class="range-row">
+                            <input type="range" id="section-plane-yaw" min="-180" max="180" step="1" value="0">
+                            <input type="number" id="section-plane-yaw-value" min="-180" max="180" step="1" value="0">
+                        </div>
+                    </div>
+                    <div class="section-field range-field">
+                        <label for="section-plane-pitch">Pitch</label>
+                        <div class="range-row">
+                            <input type="range" id="section-plane-pitch" min="-89" max="89" step="1" value="0">
+                            <input type="number" id="section-plane-pitch-value" min="-89" max="89" step="1" value="0">
+                        </div>
+                    </div>
+                    <div class="section-button-row">
+                        <button id="section-plane-section" type="button" disabled>Section</button>
+                        <button id="section-plane-align-cursor" type="button">Align to Cursor</button>
+                        <button id="section-plane-flip" type="button">Flip</button>
+                        <button id="section-plane-hide" type="button">Hide Plane</button>
+                        <button id="section-plane-reset" type="button">Reset Plane</button>
+                    </div>
+                </div>
+                
+                <div class="section-group">
+                    <div class="group-title">Box Section</div>
+                    <label class="section-toggle">
+                        <input type="checkbox" id="section-box-enable">
+                        <span>Enable Box Clipping</span>
+                    </label>
+                    <div class="section-field">
+                        <label for="section-box-center-mode">Anchor</label>
+                        <select id="section-box-center-mode">
+                            <option value="world">World Origin</option>
+                            <option value="cursor">3D Cursor</option>
+                        </select>
+                    </div>
+                    <div class="section-field range-field">
+                        <label for="section-box-scale">Scale</label>
+                        <div class="range-row">
+                            <input type="range" id="section-box-scale" min="0.1" max="5" step="0.1" value="1">
+                            <input type="number" id="section-box-scale-value" min="0.1" max="5" step="0.1" value="1">
+                        </div>
+                    </div>
+                    <div class="section-field range-field">
+                        <label for="section-box-yaw">Yaw</label>
+                        <div class="range-row">
+                            <input type="range" id="section-box-yaw" min="-180" max="180" step="1" value="0">
+                            <input type="number" id="section-box-yaw-value" min="-180" max="180" step="1" value="0">
+                        </div>
+                    </div>
+                    <div class="section-field range-field">
+                        <label for="section-box-pitch">Pitch</label>
+                        <div class="range-row">
+                            <input type="range" id="section-box-pitch" min="-89" max="89" step="1" value="0">
+                            <input type="number" id="section-box-pitch-value" min="-89" max="89" step="1" value="0">
+                        </div>
+                    </div>
+                    <div class="section-button-row">
+                        <button id="section-box-section" type="button" disabled>Section</button>
+                        <button id="section-box-align-cursor" type="button">Align to Cursor</button>
+                        <button id="section-box-flip" type="button">Flip</button>
+                        <button id="section-box-hide" type="button">Hide Box</button>
+                        <button id="section-box-reset" type="button">Reset Box</button>
+                    </div>
+                    <p class="section-helper-text">Only geometry inside the box remains visible.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="context-menu"></div>
+        <div id="axis-context-menu"></div>
+        
+        <!-- Rotation Mode Selector - 4 cells -->
+        <div id="bottom-bar-container">
+        <div id="rotation-mode-selector">
+            <button class="rotation-mode-cell active" data-mode="screen" data-tooltip="Screen Rotation" onclick="setRotationMode('screen')">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <!-- Screen rectangle with center dot -->
+                    <rect x="4" y="4" width="16" height="16" fill="none" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="rotation-mode-cell" data-mode="world" data-tooltip="World Rotation" onclick="setRotationMode('world')">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <!-- World axes (X, Y, Z) -->
+                    <line x1="12" y1="12" x2="20" y2="12" stroke-width="2"/>
+                    <line x1="12" y1="12" x2="12" y2="4" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="rotation-mode-cell" data-mode="cursor" data-tooltip="Cursor Rotation" onclick="setRotationMode('cursor')">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <!-- Cursor crosshair -->
+                    <circle cx="12" cy="12" r="6" fill="none" stroke-width="2"/>
+                    <line x1="4" y1="12" x2="8" y2="12" stroke-width="2"/>
+                    <line x1="16" y1="12" x2="20" y2="12" stroke-width="2"/>
+                    <line x1="12" y1="4" x2="12" y2="8" stroke-width="2"/>
+                    <line x1="12" y1="16" x2="12" y2="20" stroke-width="2"/>
+                </svg>
+            </button>
+            <button class="rotation-mode-cell" data-mode="selection" data-tooltip="Selection Rotation" onclick="setRotationMode('selection')">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <!-- Selected object/box -->
+                    <rect x="6" y="6" width="12" height="12" fill="none" stroke-width="2" stroke-dasharray="2 2"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        
+        <button id="rotation-pivot-hide-btn" data-tooltip="Rotation Pivot" onclick="toggleRotationPivotHide()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <!-- Orange rectangle (dashed box) -->
+                <rect x="6" y="6" width="12" height="12" fill="none" stroke-width="2" stroke-dasharray="3 2"/>
+                <!-- Center dot -->
+                <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+        </button>
+        <button id="cursor-hide-btn" data-tooltip="Cursor Hide" onclick="toggleCursorHide()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="8" fill="none"/>
+                <line x1="4" y1="12" x2="8" y2="12" stroke-linecap="round"/>
+                <line x1="16" y1="12" x2="20" y2="12" stroke-linecap="round"/>
+                <line x1="12" y1="4" x2="12" y2="8" stroke-linecap="round"/>
+                <line x1="12" y1="16" x2="12" y2="20" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <button id="axis-hide-btn" data-tooltip="Axis Hide" onclick="toggleAxisHide()" oncontextmenu="showAxisContextMenu(event); return false;">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="2" y1="2" x2="22" y2="22" stroke-linecap="round"/>
+                <line x1="12" y1="2" x2="12" y2="8" stroke-linecap="round"/>
+                <line x1="12" y1="16" x2="12" y2="22" stroke-linecap="round"/>
+                <line x1="2" y1="12" x2="8" y2="12" stroke-linecap="round"/>
+                <line x1="16" y1="12" x2="22" y2="12" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <button class="toolbar-btn toggle-mode" id="boundary-box-btn" data-tooltip="Boundary Box" onclick="toggleBoundaryBox()" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="4" width="16" height="16" rx="1" ry="1" fill="none"/>
+                <path d="M4 8h16M8 4v16" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <button class="toolbar-btn toggle-mode" id="perspective-btn" data-tooltip="Perspective Projection" onclick="togglePerspectiveMode()" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="5" width="14" height="14" rx="2" ry="2" fill="none"/>
+                <path d="M8 8l4-3 4 3v8l-4 3-4-3z" fill="none" stroke-linejoin="round"/>
+                <path d="M12 5v14M5 12h14" stroke-linecap="round" stroke-dasharray="2 2"/>
+            </svg>
+        </button>
+        </div>
+        <div id="assembly-name-input-container">
+            <input type="text" id="assembly-name-input" placeholder="Enter assembly name" value="New Assembly">
+            <div class="input-buttons">
+                <button id="assembly-name-cancel">Cancel</button>
+                <button id="assembly-name-ok" class="primary">OK</button>
+            </div>
+        </div>
+        <div id="move-assembly-container">
+            <div class="separator-text">Existing Assemblies:</div>
+            <div class="assembly-list" id="assembly-list"></div>
+            <div class="separator-text">Or Create New:</div>
+            <input type="text" id="move-assembly-input" placeholder="Enter new assembly name">
+            <div class="input-buttons">
+                <button id="move-assembly-cancel">Cancel</button>
+                <button id="move-assembly-ok" class="primary">Create & Move</button>
+            </div>
+        </div>
+        <div id="rename-input-container">
+            <input type="text" id="rename-input" placeholder="Enter new name">
+            <div class="input-buttons">
+                <button id="rename-cancel">Cancel</button>
+                <button id="rename-ok" class="primary">OK</button>
+            </div>
+        </div>
+        
+        <div id="sidebar">
+            <div id="sidebar-resize-handle"></div>
+            <div id="sidebar-header">3D Integration Tool</div>
+            <div id="tree-search" style="display: none;">
+                <input type="text" id="tree-search-input" placeholder="Search parts...">
+            </div>
+            <div id="tree-container">
+                <div id="tree-placeholder" style="padding: 20px; color: #999; text-align: center;">
+                    No model loaded. Open a GLTF/GLB file to see parts.
+                </div>
+            </div>
+            <div id="sidebar-bottom">
+                <div id="sidebar-bottom-resize-handle"></div>
+                <button class="sidebar-btn" onclick="saveTransformData()">Save</button>
+                <button class="sidebar-btn" onclick="alert('Edit function - to be implemented')">Edit</button>
+                <button class="sidebar-btn" onclick="alert('Random colour function - to be implemented')">Random Colour</button>
+                <button class="sidebar-btn" onclick="alert('Colour function - to be implemented')">Colour</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import map to redirect 'three' imports to three.module.js -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "./three.module.js"
+        }
+    }
+    </script>
+    
+    <!-- Three.js Core - Try three.module.js first (ES module), fallback to three.min.js (UMD) -->
+    <script type="module">
+        async function loadThreeAndModules() {
+            let THREE_Module;
+            
+            // Try to load three.module.js first (ES module)
+            try {
+                // Import all named exports from three.module.js
+                THREE_Module = await import('./three.module.js');
+                // three.module.js exports everything as named exports
+                // Don't assign to window.THREE yet - we'll create an extensible wrapper after loading loaders
+                console.log('Loaded three.module.js (ES module)');
+            } catch (e) {
+                // three.module.js doesn't exist, use three.min.js (UMD) as fallback
+                console.log('three.module.js not found, using three.min.js fallback...');
+                // Load three.min.js via regular script tag (it's UMD, sets window.THREE)
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'three.min.js';
+                    script.onload = () => {
+                        if (typeof window.THREE !== 'undefined') {
+                            console.log('Loaded three.min.js (UMD)');
+                            // But ES modules won't work with UMD, so show error
+                            document.getElementById('error').textContent = 
+                                'three.module.js not found!\n\n' +
+                                'ES modules (GLTFLoader.js) need three.module.js, not three.min.js.\n\n' +
+                                'SOLUTION:\n' +
+                                '1. Download: https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.module.js\n' +
+                                '2. Save as: viewer/three.module.js\n' +
+                                '3. Refresh this page\n\n' +
+                                'Or run: download_three_module.bat';
+                            document.getElementById('error').classList.add('show');
+                            document.getElementById('loading').classList.remove('show');
+                            reject(new Error('three.module.js required for ES modules'));
+                        } else {
+                            reject(new Error('THREE.js failed to load'));
+                        }
+                    };
+                    script.onerror = () => {
+                        document.getElementById('error').textContent = 'Failed to load Three.js. Please ensure three.min.js or three.module.js exists.';
+                        document.getElementById('error').classList.add('show');
+                        document.getElementById('loading').classList.remove('show');
+                        reject(new Error('Three.js load failed'));
+                    };
+                    document.head.appendChild(script);
+                });
+            }
+            
+            // If we have three.module.js, load ES modules
+            if (THREE_Module) {
+                console.log('Loading ES modules...');
+                
+                try {
+                    const [gltfModule, dracoModule, orbitModule] = await Promise.all([
+                        import('./GLTFLoader.js'),
+                        import('./DRACOLoader.js'),
+                        import('./OrbitControls.js')
+                    ]);
+                    
+                    // ES module namespace objects are not extensible, so we need to create a wrapper
+                    // Create a new object that combines THREE exports with loaders
+                    const THREE_Wrapper = Object.assign({}, THREE_Module);
+                    THREE_Wrapper.GLTFLoader = gltfModule.GLTFLoader;
+                    THREE_Wrapper.DRACOLoader = dracoModule.DRACOLoader;
+                    THREE_Wrapper.OrbitControls = orbitModule.OrbitControls;
+                    
+                    // Make the wrapper available globally
+                    window.THREE = THREE_Wrapper;
+                    
+                    console.log('ES Modules loaded successfully');
+                    
+                    // Load viewer modules after modules are ready (in correct order)
+                    const viewerScripts = [
+                        'image-capture.js',        // Image capture module (load first)
+                        'viewer-screen-core.js',    // Base class definition
+                        'viewer-screen-indicators.js', // Indicators and animate loop
+                        'viewer-screen-loading.js',   // Model loading and utilities
+                        'STLLoader.js',            // STL loader from Three.js examples
+                        'viewer-import-stl.js',    // STL import workflow
+                        'viewer-controls.js',      // Pan, rotate, zoom controls
+                        'viewer-measurement.js',   // Measurement tool
+                        'viewer-section.js',       // Section plane & clipping tools
+                        'viewer-material.js',      // Material manager (includes template colors)
+                        'viewer-tree-core.js',     // Tree building, expand/collapse, search
+                        'viewer-tree-selection.js', // Selection, visibility, reframe
+                        'viewer-tree-assembly.js',  // Assembly operations
+                        'viewer-tree-ui.js',        // Context menus, dialogs
+                        'viewer-part-photo.js',    // Part photo capture module (load after tree for partsList)
+                        'viewer-transform.js',     // Transform gizmos (Move, Rotate, Scale)
+                        'viewer-export.js',        // STL export functionality
+                        'viewer-bbox-export.js',   // Boundary box CSV export
+                        'viewer-view.js',          // View operations and global functions
+                        'viewer-random-colors.js', // Random colour viewing module
+                        'world-axes.js'            // World origin axes
+                    ];
+                    
+                    let loadedCount = 0;
+                    const loadNextScript = () => {
+                        if (loadedCount < viewerScripts.length) {
+                            const script = document.createElement('script');
+                            script.src = viewerScripts[loadedCount];
+                            script.onload = () => {
+                                console.log(viewerScripts[loadedCount] + ' loaded');
+                                loadedCount++;
+                                loadNextScript();
+                            };
+                            script.onerror = () => {
+                                document.getElementById('error').textContent = 'Failed to load ' + viewerScripts[loadedCount];
+                                document.getElementById('error').classList.add('show');
+                                document.getElementById('loading').classList.remove('show');
+                            };
+                            document.head.appendChild(script);
+                        } else {
+                            // All scripts loaded, now initialize viewer
+                            console.log('All viewer scripts loaded, initializing viewer...');
+                            // Set flag to indicate scripts are loaded
+                            window.__viewerScriptsLoaded = true;
+                            // Trigger viewer initialization if not already done
+                            if (typeof window.initViewer === 'function' && !window.__viewerInitialized) {
+                                window.initViewer();
+                            }
+                        }
+                    };
+                    loadNextScript();
+                } catch (error) {
+                    console.error('Error loading ES modules:', error);
+                    document.getElementById('error').textContent = 
+                        'Failed to load Three.js modules: ' + error.message + 
+                        '\n\nCheck browser console (F12) for details.';
+                    document.getElementById('error').classList.add('show');
+                    document.getElementById('loading').classList.remove('show');
+                }
+            }
+        }
+        
+        loadThreeAndModules().catch(error => {
+            console.error('Failed to initialize:', error);
+        });
+    </script>
+    
+    <!-- Fallback for non-module browsers -->
+    <script>
+        // Fallback loading if ES modules fail
+        window.addEventListener('error', (e) => {
+            if (e.target && e.target.tagName === 'SCRIPT' && e.target.type === 'module') {
+                console.error('ES Module load failed:', e.target.src);
+                document.getElementById('error').textContent = 'ES Modules not supported. Please use a modern browser or download browser-compatible Three.js versions.';
+                document.getElementById('error').classList.add('show');
+                document.getElementById('loading').classList.remove('show');
+            }
+        }, true);
+
+        // Left toolbar button handlers (only for #left-toolbar buttons, not top-controls)
+        document.addEventListener('DOMContentLoaded', () => {
+            const leftToolbar = document.getElementById('left-toolbar');
+            if (leftToolbar) {
+                const leftToolbarButtons = leftToolbar.querySelectorAll('.toolbar-btn');
+                
+                leftToolbarButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const toolId = btn.id;
+                        const selectToolBtn = document.getElementById('select-tool');
+                        const cursorToolBtn = document.getElementById('cursor-tool');
+                        
+                        // Handle select-tool and cursor-tool as mutually exclusive toggle buttons
+                        if (toolId === 'select-tool' || toolId === 'cursor-tool') {
+                            // Remove active from both select and cursor tools
+                            selectToolBtn.classList.remove('active');
+                            cursorToolBtn.classList.remove('active');
+                            // Add active to clicked one
+                            btn.classList.add('active');
+                            
+                            // Remove active from all other tools
+                            leftToolbarButtons.forEach(b => {
+                                if (b.id !== 'select-tool' && b.id !== 'cursor-tool') {
+                                    b.classList.remove('active');
+                                }
+                            });
+                        } else {
+                            // For other tools, remove active from all
+                            leftToolbarButtons.forEach(b => b.classList.remove('active'));
+                            // Add active to clicked button
+                            btn.classList.add('active');
+                            // Ensure select-tool is active (default) when other tools are selected
+                            selectToolBtn.classList.add('active');
+                        }
+                        
+                        // Handle specific tool actions
+                        switch(toolId) {
+                            case 'select-tool':
+                                console.log('Select tool activated');
+                                // Disable cursor placement mode
+                                if (typeof viewer !== 'undefined' && viewer) {
+                                    viewer.cursor3DEnabled = false;
+                                    // Update canvas cursor style
+                                    if (typeof viewer._updateCanvasCursor === 'function') {
+                                        viewer._updateCanvasCursor();
+                                    }
+                                }
+                                break;
+                            case 'cursor-tool':
+                                console.log('Cursor tool activated - Click on mesh to place point');
+                                // Enable cursor placement mode (like Blender)
+                                if (typeof viewer !== 'undefined' && viewer) {
+                                    viewer.cursor3DEnabled = true;
+                                    // Update canvas cursor style
+                                    if (typeof viewer._updateCanvasCursor === 'function') {
+                                        viewer._updateCanvasCursor();
+                                    }
+                                }
+                                break;
+                            case 'move-tool':
+                                console.log('Move tool activated - Part location move');
+                                // Disable cursor placement mode, show move gizmo for selected part
+                                if (typeof viewer !== 'undefined' && viewer) {
+                                    viewer.cursor3DEnabled = false;
+                                    // Show move gizmo for selected part
+                                    if (viewer.selectedPartUUIDs && viewer.selectedPartUUIDs.length > 0) {
+                                        const selectedUUID = viewer.selectedPartUUIDs[0];
+                                        if (typeof viewer.showMoveGizmo === 'function') {
+                                            viewer.showMoveGizmo(selectedUUID);
+                                        }
+                                    }
+                                }
+                                break;
+                            case 'rotate-tool':
+                                console.log('Rotate tool activated - Part rotate');
+                                // Disable cursor placement mode, show rotate gizmo for selected part
+                                if (typeof viewer !== 'undefined' && viewer) {
+                                    viewer.cursor3DEnabled = false;
+                                    // Show rotate gizmo for selected part
+                                    if (viewer.selectedPartUUIDs && viewer.selectedPartUUIDs.length > 0) {
+                                        const selectedUUID = viewer.selectedPartUUIDs[0];
+                                        if (typeof viewer.showRotateGizmo === 'function') {
+                                            viewer.showRotateGizmo(selectedUUID);
+                                        }
+                                    }
+                                }
+                                break;
+                            case 'transform-tool':
+                                console.log('Transform tool activated - Move and rotate both');
+                                // Disable cursor placement mode, show transform gizmo (both arrows and half-circles)
+                                if (typeof viewer !== 'undefined' && viewer) {
+                                    viewer.cursor3DEnabled = false;
+                                    // Show transform gizmo for selected part (both move arrows and rotate circles)
+                                    if (viewer.selectedPartUUIDs && viewer.selectedPartUUIDs.length > 0) {
+                                        const selectedUUID = viewer.selectedPartUUIDs[0];
+                                        if (typeof viewer.showTransformGizmo === 'function') {
+                                            viewer.showTransformGizmo(selectedUUID);
+                                        }
+                                    }
+                                }
+                                break;
+                            case 'scale-tool':
+                                console.log('Scale tool activated - Part scale');
+                                // Disable cursor placement mode, show scale gizmo for selected part
+                                if (typeof viewer !== 'undefined' && viewer) {
+                                    viewer.cursor3DEnabled = false;
+                                    // Show scale gizmo for selected part
+                                    if (viewer.selectedPartUUIDs && viewer.selectedPartUUIDs.length > 0) {
+                                        const selectedUUID = viewer.selectedPartUUIDs[0];
+                                        if (typeof viewer.showScaleGizmo === 'function') {
+                                            viewer.showScaleGizmo(selectedUUID);
+                                        }
+                                    }
+                                }
+                                break;
+                            case 'annotation-tool':
+                                console.log('Annotation tool activated');
+                                // Disable cursor placement mode
+                                if (typeof viewer !== 'undefined' && viewer) {
+                                    viewer.cursor3DEnabled = false;
+                                }
+                                break;
+                            case 'measurement-tool':
+                                console.log('Measurement tool activated');
+                                // Toggle measurement tool
+                                if (typeof viewer !== 'undefined' && viewer) {
+                                    viewer.cursor3DEnabled = false;
+                                    // Disable select tool when measurement is active
+                                    const selectToolBtn = document.getElementById('select-tool');
+                                    if (selectToolBtn) {
+                                        selectToolBtn.classList.remove('active');
+                                        selectToolBtn.disabled = true;
+                                    }
+                                    if (typeof viewer.toggleMeasurementTool === 'function') {
+                                        viewer.toggleMeasurementTool();
+                                    }
+                                }
+                                break;
+                        }
+                    });
+                });
+                
+                // Right-click handler for cursor tool button
+                const cursorToolBtn = document.getElementById('cursor-tool');
+                if (cursorToolBtn) {
+                    cursorToolBtn.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const contextMenu = document.getElementById('context-menu');
+                        if (!contextMenu) return;
+                        
+                        // Hide menu if clicking outside
+                        const hideMenu = (ev) => {
+                            if (contextMenu && !contextMenu.contains(ev.target) && ev.target !== cursorToolBtn) {
+                                contextMenu.style.display = 'none';
+                                document.removeEventListener('click', hideMenu);
+                                document.removeEventListener('contextmenu', hideMenu);
+                            }
+                        };
+                        
+                        // Build context menu
+                        contextMenu.innerHTML = '';
+                        
+                        // Reset option
+                        const resetItem = document.createElement('div');
+                        resetItem.className = 'context-menu-item';
+                        resetItem.textContent = 'Reset';
+                        resetItem.onclick = () => {
+                            contextMenu.style.display = 'none';
+                            // Reset cursor to world origin (0,0,0)
+                            if (typeof viewer !== 'undefined' && viewer) {
+                                if (viewer.cursor3DPosition) {
+                                    viewer.cursor3DPosition.set(0, 0, 0);
+                                }
+                                if (viewer.cursor3DGroup) {
+                                    viewer.cursor3DGroup.position.set(0, 0, 0);
+                                }
+                                console.log('3D Cursor reset to world origin (0,0,0)');
+                            }
+                            document.removeEventListener('click', hideMenu);
+                            document.removeEventListener('contextmenu', hideMenu);
+                        };
+                        contextMenu.appendChild(resetItem);
+                        
+                        // Position menu at cursor, but ensure it stays on screen
+                        contextMenu.style.display = 'block';
+                        const menuWidth = contextMenu.offsetWidth || 150;
+                        const menuHeight = contextMenu.offsetHeight || 50;
+                        const viewportWidth = window.innerWidth;
+                        const viewportHeight = window.innerHeight;
+                        
+                        let left = e.pageX;
+                        let top = e.pageY;
+                        
+                        // Adjust if menu would go off right edge
+                        if (left + menuWidth > viewportWidth) {
+                            left = viewportWidth - menuWidth - 10;
+                        }
+                        
+                        // Adjust if menu would go off bottom edge
+                        if (top + menuHeight > viewportHeight) {
+                            top = viewportHeight - menuHeight - 10;
+                        }
+                        
+                        // Ensure menu doesn't go off left or top edge
+                        if (left < 10) left = 10;
+                        if (top < 10) top = 10;
+                        
+                        contextMenu.style.left = left + 'px';
+                        contextMenu.style.top = top + 'px';
+                        
+                        // Hide menu on click outside
+                        setTimeout(() => {
+                            document.addEventListener('click', hideMenu);
+                            document.addEventListener('contextmenu', hideMenu);
+                        }, 10);
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

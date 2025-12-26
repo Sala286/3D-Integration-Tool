@@ -1,0 +1,12 @@
+customtkinter>=5.2.0
+Pillow>=10.0.0
+# For native 3D rendering (no browser, no Three.js):
+PyOpenGL>=3.1.6
+PyOpenGL-accelerate>=3.1.6
+trimesh>=3.9.0
+numpy>=1.24.0,<2.0.0
+# For embedded browser viewer (recommended for best experience):
+cefpython3>=66.0  # Optional - install with: pip install cefpython3
+# Alternative embedded viewer:
+# pywebview>=4.4.0  # Optional
+
